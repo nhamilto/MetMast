@@ -1,0 +1,1199 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Import MET Data (lambda/no lambda) &#8212; MetMast 2018 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to MetMast!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <p>These are all of the import statements:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">calendar</span> <span class="k">import</span> <span class="n">monthrange</span><span class="p">,</span> <span class="n">month_name</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">pickle</span> <span class="k">as</span> <span class="nn">pkl</span>
+</pre></div>
+</div>
+<div class="section" id="import-met-data-lambda-no-lambda">
+<h1>Import MET Data (lambda/no lambda)<a class="headerlink" href="#import-met-data-lambda-no-lambda" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load_met_data</span><span class="p">(</span><span class="n">inputfiles</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+</pre></div>
+</div>
+<p><strong>Load the data with a lambda function.</strong></p>
+<p>This function extracts the data from the input Comma-Separated (.csv) files and outputs them into a pandas DataFrame.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">param inputfiles:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">All of the input files (.csv) to be loaded for analysis.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param verbose:</th><td class="field-body">Defines whether or not the name of the file should be printed as the function runs.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">type inputfiles:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">list</td>
+</tr>
+<tr class="field-even field"><th class="field-name">type verbose:</th><td class="field-body">Boolean</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">returns metdat:</th><td class="field-body">Contains all of the requested data extracted from the input files.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">rtype metdat:</th><td class="field-body">pandas DataFrame</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># date parser for pandas</span>
+<span class="n">dp</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1">-%m-%Y %H:%M:%S&#39;</span><span class="p">)</span>
+<span class="n">filecount</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="k">for</span> <span class="n">fName</span> <span class="ow">in</span> <span class="n">inputfiles</span><span class="p">:</span>
+    <span class="n">df_lo</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fName</span><span class="p">,</span>\
+                        <span class="n">index_col</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>\
+                        <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>\
+                        <span class="n">date_parser</span><span class="o">=</span><span class="n">dp</span><span class="p">,</span>\
+                        <span class="n">skiprows</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">],</span>\
+                        <span class="n">low_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">error_bad_lines</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">filecount</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">metdat</span> <span class="o">=</span> <span class="n">df_lo</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">metdat</span> <span class="o">=</span> <span class="n">metdat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_lo</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+    <span class="n">filecount</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">fName</span><span class="p">)</span>
+<span class="n">metdat</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">metdat</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tz_localize</span><span class="p">(</span><span class="s1">&#39;UTC&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">tz_convert</span><span class="p">(</span><span class="s1">&#39;America/Denver&#39;</span><span class="p">)</span>
+
+<span class="c1"># replace flagged value &#39;-999.0&#39; with nans</span>
+<span class="n">metdat</span><span class="p">[</span><span class="n">metdat</span><span class="o">==-</span><span class="mf">999.0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+<span class="k">return</span> <span class="n">metdat</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load_met_data_alt</span><span class="p">(</span><span class="n">inputfiles</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+</pre></div>
+</div>
+<p><strong>Load the data without a lambda function.</strong></p>
+<p>This function extracts the data from the input Comma-Separated (.csv) files and outputs them into a pandas DataFrame. This is an alternate to the previous function to avoid the use of a data parser lambda function.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">param inputfiles:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">All of the input files (.csv) to be loaded for analysis.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param verbose:</th><td class="field-body">Defines whether or not the name of the file should be printed as the function runs.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">type inputfiles:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">list</td>
+</tr>
+<tr class="field-even field"><th class="field-name">type verbose:</th><td class="field-body">Boolean</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">returns metdat:</th><td class="field-body">A pandas DataFrame containing all of the requested data extracted from the input files.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">rtype metdat:</th><td class="field-body">pandas DataFrame</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">filecount</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="k">for</span> <span class="n">fName</span> <span class="ow">in</span> <span class="n">inputfiles</span><span class="p">:</span>
+    <span class="n">df_lo</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fName</span><span class="p">,</span>\
+                        <span class="n">skiprows</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span>\
+                        <span class="n">low_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">filecount</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">metdat</span> <span class="o">=</span> <span class="n">df_lo</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">metdat</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">df_lo</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">metdat</span> <span class="o">=</span> <span class="n">metdat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_lo</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+    <span class="n">filecount</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">fName</span><span class="p">)</span>
+
+<span class="n">metdat</span><span class="p">[</span><span class="s1">&#39;Date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">metdat</span><span class="p">[</span><span class="s1">&#39;Date&#39;</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">,</span> <span class="n">infer_datetime_format</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">metdat</span> <span class="o">=</span> <span class="n">metdat</span><span class="p">[</span><span class="n">metdat</span><span class="o">.</span><span class="n">Date</span><span class="o">.</span><span class="n">notnull</span><span class="p">()]</span>
+<span class="n">metdat</span> <span class="o">=</span>  <span class="n">metdat</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;Date&#39;</span><span class="p">)</span>
+
+<span class="c1"># metdat.index = metdat.index.tz_localize(&#39;UTC&#39;).tz_convert(&#39;America/Denver&#39;)</span>
+
+<span class="n">temp</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">metdat</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39; QC&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">name</span><span class="p">]</span>
+<span class="n">qcNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">metdat</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39; QC&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">]</span>
+<span class="n">fNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">temp</span> <span class="k">if</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; QC&#39;</span> <span class="ow">in</span> <span class="n">qcNames</span><span class="p">]</span>
+
+<span class="n">metdat</span><span class="p">[</span><span class="n">fNames</span><span class="p">]</span> <span class="o">=</span> <span class="n">metdat</span><span class="p">[</span><span class="n">fNames</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+<span class="n">metdat</span><span class="p">[</span><span class="n">qcNames</span><span class="p">]</span> <span class="o">=</span> <span class="n">metdat</span><span class="p">[</span><span class="n">qcNames</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;dtypes corrected&#39;</span><span class="p">)</span>
+
+<span class="c1"># replace flagged value &#39;-999.0&#39; with nans</span>
+<span class="n">metdat</span><span class="p">[</span><span class="n">metdat</span><span class="o">==-</span><span class="mf">999.0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+<span class="n">metdat</span><span class="o">.</span><span class="n">tz_localize</span><span class="p">(</span><span class="s1">&#39;UTC&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">tz_convert</span><span class="p">(</span><span class="s1">&#39;America/Denver&#39;</span><span class="p">)</span>
+
+<span class="k">return</span> <span class="n">metdat</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="filter-the-data">
+<h1>Filter the Data<a class="headerlink" href="#filter-the-data" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">drop_nan_cols</span><span class="p">(</span><span class="n">metdat</span><span class="p">):</span>
+</pre></div>
+</div>
+<p><strong>Remove empty columns.</strong></p>
+<p>This function takes the contents of the pandas DataFrame containing all of the data from the input files and filters it by removing any missing columns (e.g., N/A).</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param metdat:</th><td class="field-body">Contains all of the requested data extracted from the input files.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">type metdat:</th><td class="field-body">pandas DataFrame</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">returns temp:</th><td class="field-body">Contains all of the requested data extracted from the input files without any missing columns (e.g., N/A)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">rtype temp:</th><td class="field-body">pandas DataFrame</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">temp</span> <span class="o">=</span> <span class="n">metdat</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
+
+<span class="k">return</span> <span class="n">temp</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">qc_mask</span><span class="p">(</span><span class="n">metdat</span><span class="p">):</span>
+</pre></div>
+</div>
+<p><strong>Remove columns for quality control.</strong></p>
+<p>This function takes the contents of the pandas DataFrame containing all of the data from the input files and filters data based on a mask of columns containing the term ‘qc’ (Quality Control parameters).</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param metdat:</th><td class="field-body">Contains all of the requested data extracted from the input files.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">type metdat:</th><td class="field-body">pandas DataFrame</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">returns dfFilt:</th><td class="field-body">Contains a filtered version of the requested data extracted from the input files by removing columns containing a quality control parameter.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">rtype dfFilt:</th><td class="field-body">pandas DataFrame</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">temp</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">metdat</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39; QC&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">name</span><span class="p">]</span>
+<span class="n">qcNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">metdat</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39; QC&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">]</span>
+<span class="n">fNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">temp</span> <span class="k">if</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; QC&#39;</span> <span class="ow">in</span> <span class="n">qcNames</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;number of data columns:&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">fNames</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;number of QC columns:&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">qcNames</span><span class="p">))</span>
+
+<span class="c1"># initialize filtered dataframe with &#39;record&#39;, &#39;version&#39;</span>
+<span class="n">dfFilt</span> <span class="o">=</span> <span class="n">metdat</span><span class="p">[</span><span class="n">metdat</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="c1"># apply QC mask to each set of columns individually</span>
+<span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">fNames</span><span class="p">,</span> <span class="n">qcNames</span><span class="p">):</span>
+<span class="c1">#     print(fname, qname)</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="n">metdat</span><span class="p">[[</span><span class="n">f</span><span class="p">,</span> <span class="n">q</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">temp</span><span class="p">[</span><span class="n">q</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="n">temp</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">dfFilt</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>
+
+<span class="k">return</span> <span class="n">dfFilt</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="begin-categorization">
+<h1>Begin Categorization<a class="headerlink" href="#begin-categorization" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">flag_stability</span><span class="p">(</span><span class="n">metdat</span><span class="p">):</span>
+</pre></div>
+</div>
+<p><strong>Denote stability based on Obukhov Length.</strong></p>
+<p>This function takes the contents of the pandas DataFrame containing all of the data from the input files and adds a new set of columns denoting a stability class based on the Obukhov Length at various heights.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param metdat:</th><td class="field-body">Contains all of the requested data extracted from the input files.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">type metdat:</th><td class="field-body">pandas DataFrame</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">returns stabcat:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Contains the stability flag parameter for each desired row of the input data based on the Obukhov Length and can be classified as Very Stable, Stable, Neutral, Unstable, and Very Unstable.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">returns stabconds:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">Contains the values of the Obukhov Length for each desired row of the input data.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">rtype stabcat:</th><td class="field-body">dictionary</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">rtype stabconds:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MOLcols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">metdat</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="s1">&#39;monin-obukhov length&#39;</span> <span class="ow">in</span> <span class="n">col</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">MOLcols</span><span class="p">:</span>
+    <span class="c1"># get probe height</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># extract data from MetDat</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">metdat</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">categoriesIdx</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Very Stable&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">L</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">L</span><span class="o">&lt;=</span><span class="mi">200</span><span class="p">),</span>
+                    <span class="s1">&#39;Stable&#39;</span> <span class="p">:</span> <span class="p">(</span><span class="n">L</span><span class="o">&gt;</span><span class="mi">200</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">L</span><span class="o">&lt;=</span><span class="mi">500</span><span class="p">),</span>
+                    <span class="s1">&#39;Neutral&#39;</span> <span class="p">:</span> <span class="p">(</span><span class="n">L</span><span class="o">&lt;-</span><span class="mi">500</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">L</span><span class="o">&gt;</span><span class="mi">500</span><span class="p">),</span>
+                    <span class="s1">&#39;Unstable&#39;</span> <span class="p">:</span> <span class="p">(</span><span class="n">L</span><span class="o">&gt;=-</span><span class="mi">500</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">L</span><span class="o">&lt;-</span><span class="mi">200</span><span class="p">),</span>
+                    <span class="s1">&#39;Very Unstable&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">L</span><span class="o">&gt;=-</span><span class="mi">200</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">L</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)}</span>
+
+    <span class="c1"># make new column</span>
+    <span class="n">newcolname</span> <span class="o">=</span> <span class="s1">&#39;Stability Flag (</span><span class="si">{}</span><span class="s1">m)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">metdat</span><span class="p">[</span><span class="n">newcolname</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="k">for</span> <span class="n">cat</span> <span class="ow">in</span> <span class="n">categoriesIdx</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">metdat</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">categoriesIdx</span><span class="p">[</span><span class="n">cat</span><span class="p">],</span><span class="n">newcolname</span><span class="p">]</span> <span class="o">=</span> <span class="n">cat</span>
+
+<span class="n">stabcat</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;stability flag&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">metdat</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="s1">&#39;Stability Flag&#39;</span> <span class="ow">in</span> <span class="n">x</span><span class="p">]}</span>
+<span class="n">stabconds</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">categoriesIdx</span><span class="p">]</span>
+
+<span class="k">return</span> <span class="n">stabconds</span><span class="p">,</span> <span class="n">stabcat</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="groom-data-based-on-parameters">
+<h1>Groom Data Based on Parameters<a class="headerlink" href="#groom-data-based-on-parameters" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">groom_data</span><span class="p">(</span><span class="n">metdat</span><span class="p">,</span> <span class="n">varcats</span><span class="p">):</span>
+</pre></div>
+</div>
+<p><strong>Trim data based on several parameters.</strong></p>
+<p>This function takes the contents of the pandas DataFrame containing all of the data from the input files as well as a list of categories that are desired to be kept and outputs a statement displaying the remaining number of columns left after filtering.</p>
+<p><strong>Possible Edit</strong>: This function could be divided into separate functions or could be made more general. Additionally the following code could be used…</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>dropcols = True
+filter = [‘ti’, &#39;monin-obukhov length&#39;,&#39;temperature&#39;,&#39;gradient richarson&#39;]):
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>cont.</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param metdat:</th><td class="field-body">Contains all of the requested data extracted from the input files.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param varcats:</th><td class="field-body">All the categories which are desired to be kept after filtering.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">type metdat:</th><td class="field-body">pandas DataFrame</td>
+</tr>
+<tr class="field-even field"><th class="field-name">type varcats:</th><td class="field-body">list</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">returns:</th><td class="field-body">A print statement displaying the number of columns after filtering for columns not contained in the list of desired columns, Turbulent Intensity, Obukhov Length, Sonic Temperature, and Gradient Richardson Number.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">rtype:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">## drop columns</span>
+<span class="n">keepcols</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span>  <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">varcats</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">varcats</span><span class="p">[</span><span class="n">x</span><span class="p">]]</span>
+<span class="n">dropcols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">metdat</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keepcols</span><span class="p">]</span>
+<span class="n">metdat</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">dropcols</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># filter TI to where wind speed &gt;= 1 m/s</span>
+<span class="k">for</span> <span class="n">ii</span><span class="p">,</span><span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">varcats</span><span class="p">[</span><span class="s1">&#39;speed&#39;</span><span class="p">]):</span>
+    <span class="n">metdat</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">metdat</span><span class="p">[</span><span class="n">varcats</span><span class="p">[</span><span class="s1">&#39;speed&#39;</span><span class="p">][</span><span class="n">ii</span><span class="p">]]</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">,</span><span class="n">varcats</span><span class="p">[</span><span class="s1">&#39;ti&#39;</span><span class="p">][</span><span class="n">ii</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+<span class="c1"># filter obhukov length</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">varcats</span><span class="p">[</span><span class="s1">&#39;monin-obukhov length&#39;</span><span class="p">]:</span>
+    <span class="n">metdat</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">metdat</span><span class="p">[</span><span class="n">col</span><span class="p">])</span><span class="o">&gt;</span><span class="mi">2000</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+<span class="c1"># filter sonic temperatures (kelvins vs degrees C)</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">varcats</span><span class="p">[</span><span class="s1">&#39;air temperature&#39;</span><span class="p">]:</span>
+    <span class="n">metdat</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">metdat</span><span class="p">[</span><span class="n">col</span><span class="p">])</span><span class="o">&gt;</span><span class="mi">200</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">metdat</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">metdat</span><span class="p">[</span><span class="n">col</span><span class="p">])</span><span class="o">&gt;</span><span class="mi">200</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span><span class="o">-</span><span class="mi">273</span>
+
+<span class="c1"># filter gradient richardson number</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">varcats</span><span class="p">[</span><span class="s1">&#39;gradient richardson&#39;</span><span class="p">]:</span>
+    <span class="n">metdat</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">metdat</span><span class="p">[</span><span class="n">col</span><span class="p">])</span><span class="o">&gt;</span><span class="mi">20</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;number of columns after filtering: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metdat</span><span class="o">.</span><span class="n">columns</span><span class="p">)))</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">reject_outliers</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+</pre></div>
+</div>
+<p><strong>Remove any outliers.</strong></p>
+<p>This function takes the contents of the pandas DataFrame containing all of the data from a desired data file and outputs a filtered version by removing any outliers.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param data:</th><td class="field-body">Contains the desired data that is to be filtered for outliers.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param m:</th><td class="field-body">Denotes the number of standard deviations that are desired as a cutoff for defining outliers.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">type data:</th><td class="field-body">pandas DataFrame</td>
+</tr>
+<tr class="field-even field"><th class="field-name">type m:</th><td class="field-body">integer</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">returns data:</th><td class="field-body">A filtered version of the input data file by rejecting any outliers above <em>m</em> (5) standard deviations.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">rtype data:</th><td class="field-body">pandas DataFrame</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="nb">abs</span><span class="p">(</span><span class="n">data</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="o">&lt;</span> <span class="n">m</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">data</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="organize-the-data">
+<h1>Organize the Data<a class="headerlink" href="#organize-the-data" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">categorize_fields</span><span class="p">(</span><span class="n">metdat</span><span class="p">,</span> <span class="n">keeplist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">excludelist</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</pre></div>
+</div>
+<p><strong>Categorize all of the fields of the data.</strong></p>
+<p>This function takes the contents of the pandas DataFrame containing all of the data from a desired input data file and outputs the variable categories, units, labels for plotting, and strings for saving files and figures.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param metdat:</th><td class="field-body">A pandas DataFrame containing all of the requested data extracted from the input files.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param keeplist:</th><td class="field-body">A list containing all of the categories that are to be kept after filtering the desired input data.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">param excludelist:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">A list containing all of the categories that are to be excluded after the filtering desired input data.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">returns varcats:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">A dictionary containing all of the categories in the desired data.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">returns varunits:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">A dictionary containing all of the units of the desired data.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">returns varlabels:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">A dictionary containing all of the labels that will be used for plotting the desired data.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">returns varsave:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">A dictionary containing all of the string values that will be used for saving files and figures of the desired data.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">colnames</span> <span class="o">=</span> <span class="n">metdat</span><span class="o">.</span><span class="n">columns</span>
+
+<span class="n">temp</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; (&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">if</span> <span class="s1">&#39;(u)&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">x</span> <span class="ow">and</span> <span class="s1">&#39;(v)&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">x</span> <span class="ow">and</span> <span class="s1">&#39;(w)&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">x</span> <span class="k">else</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;) (&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">colnames</span><span class="p">]</span>
+<span class="n">temp</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+<span class="n">temp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+
+<span class="c1"># remove unwanted fields</span>
+<span class="k">if</span> <span class="n">excludelist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">excludelist</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">excludelist</span> <span class="o">=</span> <span class="n">categories_to_exclude</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">excl</span> <span class="ow">in</span> <span class="n">excludelist</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">temp</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">excl</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="n">ind</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="n">temp</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+    <span class="n">temp</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+<span class="c1"># or keep only a select list</span>
+<span class="k">if</span> <span class="n">keeplist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">keeplist</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">keeplist</span> <span class="o">=</span> <span class="n">categories_to_keep</span><span class="p">()</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">keeplist</span><span class="p">))</span>
+    <span class="n">temp</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+<span class="n">varcats</span> <span class="o">=</span> <span class="p">{</span><span class="n">cat</span><span class="p">:[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">colnames</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">cat</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">cat</span> <span class="ow">in</span> <span class="n">temp</span><span class="p">}</span>
+
+<span class="n">varcats</span><span class="p">[</span><span class="s1">&#39;speed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">varcats</span><span class="p">[</span><span class="s1">&#39;speed&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;speed (&#39;</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+<span class="n">varcats</span><span class="p">[</span><span class="s1">&#39;dissipation rate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">varcats</span><span class="p">[</span><span class="s1">&#39;dissipation rate&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;sf&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+<span class="n">varcats</span><span class="p">[</span><span class="s1">&#39;ti&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">colnames</span> <span class="k">if</span> <span class="s1">&#39;cup equivalent ti&#39;</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+
+<span class="c1"># units</span>
+<span class="n">units</span> <span class="o">=</span> <span class="n">get_units</span><span class="p">()</span>
+<span class="n">varunits</span> <span class="o">=</span> <span class="p">{</span><span class="n">cat</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">cat</span> <span class="ow">in</span> <span class="n">varcats</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">units</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">title</span><span class="p">()</span> <span class="ow">in</span> <span class="n">cat</span><span class="o">.</span><span class="n">title</span><span class="p">()}</span>
+
+<span class="c1"># labels for plotting</span>
+<span class="n">varlabels</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">title</span><span class="p">()</span><span class="o">+</span><span class="s1">&#39; &#39;</span><span class="o">+</span> <span class="n">varunits</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">varcats</span><span class="p">}</span>
+<span class="c1"># a few ad hoc corrections</span>
+<span class="n">varlabels</span><span class="p">[</span><span class="s1">&#39;turbulent kinetic energy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;TKE&#39;</span><span class="o">+</span> <span class="n">varunits</span><span class="p">[</span><span class="s1">&#39;turbulent kinetic energy&#39;</span><span class="p">]</span>
+<span class="n">varlabels</span><span class="p">[</span><span class="s1">&#39;direction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Wind &#39;</span> <span class="o">+</span> <span class="n">varlabels</span><span class="p">[</span><span class="s1">&#39;direction&#39;</span><span class="p">]</span>
+<span class="n">varlabels</span><span class="p">[</span><span class="s1">&#39;speed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Wind &#39;</span> <span class="o">+</span> <span class="n">varlabels</span><span class="p">[</span><span class="s1">&#39;speed&#39;</span><span class="p">]</span>
+<span class="n">varlabels</span><span class="p">[</span> <span class="s1">&#39;stability parameter z/l&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="s1">&#39;Stability Parameter z/L [--]&#39;</span>
+
+<span class="c1"># strings for saving files and figures</span>
+<span class="n">varsave</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">varcats</span><span class="p">}</span>
+
+<span class="k">return</span> <span class="n">varcats</span><span class="p">,</span> <span class="n">varunits</span><span class="p">,</span> <span class="n">varlabels</span><span class="p">,</span> <span class="n">varsave</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_catinfo</span><span class="p">(</span><span class="n">metdat</span><span class="p">):</span>
+</pre></div>
+</div>
+<p><strong>Get categorical information of the data.</strong></p>
+<p>This function takes the contents of the pandas DataFrame containing all of the data from a desired input data file and returns a set containing all of the categories, units, labels for plotting, and strings for saving files and figures.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param metdat:</th><td class="field-body">A pandas DataFrame containing all of the requested data extracted from the input files.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">returns catinfo:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">A set containing all of the categories, units, labels for plotting, and strings for saving files and figures for the desired data.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">varcats</span><span class="p">,</span> <span class="n">varunits</span><span class="p">,</span> <span class="n">varlabels</span><span class="p">,</span> <span class="n">varsave</span> <span class="o">=</span> <span class="n">categorize_fields</span><span class="p">(</span><span class="n">metdat</span><span class="p">,</span> <span class="n">keeplist</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">catinfo</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">catinfo</span><span class="p">[</span><span class="s1">&#39;columns&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">varcats</span>
+<span class="n">catinfo</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">varunits</span>
+<span class="n">catinfo</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">varlabels</span>
+<span class="n">catinfo</span><span class="p">[</span><span class="s1">&#39;save&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">varsave</span>
+
+<span class="k">return</span> <span class="n">catinfo</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="auxiliary-functions-to-filter-data">
+<h1>Auxiliary Functions to Filter Data<a class="headerlink" href="#auxiliary-functions-to-filter-data" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">categories_to_exclude</span><span class="p">():</span>
+</pre></div>
+</div>
+<p><strong>Define categories to exclude for filtering.</strong></p>
+<p>This function does not take in any inputs but does output a list containing all of the categories that are chosen to be excluded from the desired input data.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param:</th><td class="field-body">None.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">returns excats:</th><td class="field-body">A list containing all of the categories that are chosen to be excluded from the desired input data.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">excats</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;advection&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;angle&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;boom&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;equivalent&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Log-Law&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Preciptation Sensor&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;peak&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;record&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;spectral&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;kaimal&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;speed U&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;SF_&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;std. dev.&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;surface&#39;</span><span class="p">,</span><span class="s1">&#39;*&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;structure&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;total&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;zero-crossing&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;sigma&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;d(t)&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Virtual&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Brunt&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;height&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;sigma&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;version&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;sensible&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;potential&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;zero-crossing integral length scale (u)&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;peak coherent&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;(SF_&#39;</span><span class="p">,</span><span class="s1">&#39;zero-crossing&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;boom&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;speed u&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;valid&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;kaimal&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;peak downward&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;peak upward&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;velocity structure&#39;</span><span class="p">]</span>
+<span class="k">return</span> <span class="n">excats</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">categories_to_keep</span><span class="p">():</span>
+</pre></div>
+</div>
+<p><strong>Define categories to keep for filtering.</strong></p>
+<p>This function does not take in any inputs but does output a list containing all of the categories that are chosen to be included from the desired input data.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param:</th><td class="field-body">None.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">returns keepcats:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">A list containing all of the categories that are chosen to be included from the desired input data.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">keepcats</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;air density&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;air pressure&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;air temperature&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;coherent tke&#39;</span><span class="p">,</span>
+             <span class="c1"># &#39;cov(u_w)&#39;,</span>
+             <span class="c1"># &#39;cov(w_t)&#39;,</span>
+             <span class="s1">&#39;direction&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;dissipation rate&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;gradient richardson&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;integral length scale (u)&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;integral length scale (v)&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;integral length scale (w)&#39;</span><span class="p">,</span>
+             <span class="c1"># &quot;mean(w&#39;t&#39;)&quot;,</span>
+             <span class="c1"># &#39;momentum flux&#39;,</span>
+             <span class="s1">&#39;monin-obukhov length&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;relative humidity&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;speed&#39;</span><span class="p">,</span>
+             <span class="c1"># &#39;speed gradient richardson&#39;,</span>
+             <span class="s1">&#39;stability flag&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;stability parameter z/l&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;ti&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;turbulent kinetic energy&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;wind shear&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;wind veer&#39;</span><span class="p">]</span>
+<span class="k">return</span> <span class="n">keepcats</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="code-for-future-plotting">
+<h1>Code for Future Plotting<a class="headerlink" href="#code-for-future-plotting" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_units</span><span class="p">():</span>
+</pre></div>
+</div>
+<p><strong>Get units for the data.</strong></p>
+<p>This function does not take in any inputs but does output a dictionary containing all of the units of the desired input data.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param:</th><td class="field-body">None.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">returns units:</th><td class="field-body">A dictionary containing all of the units of the desired input data.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">units</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;density&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;[kg/m$^3$]&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;pressure&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;[mmHg]&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;temperature&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;[$^\circ C$]&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;tke&#39;</span><span class="p">:</span><span class="sa">r</span><span class="s1">&#39;[m$^2$/s$^2$]&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;direction&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;[$^\circ$]&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;dissipation&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;[m$^2$/s$^3$]&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;richardson&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;[--]&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;length&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;[m]&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;humidity&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;[%]&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;speed&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;[m/s]&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;stability parameter z/l&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;[--]&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;ti&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;[%]&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;turbulent kinetic energy&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;[m$^2$/s$^2$]&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;shear&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;[--]&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;veer&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;[$^\circ$]&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;flag&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;[--]&#39;</span><span class="p">}</span>
+<span class="k">return</span> <span class="n">units</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">make_datetime_vector</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="mf">20.0</span><span class="p">):</span>
+</pre></div>
+</div>
+<p><strong>Generate a time range for the data.</strong></p>
+<p>This function takes inputs from filenames of the form ‘%m_%d_%y_%H_%M_%S_%U.mat’ of the desired span and frequency of data and generates a vector for the date and time for the data.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param filename:</th><td class="field-body">A string denoting the desired file name for the input data.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param span:</th><td class="field-body">An integer value used to define the span of the data included in the filename (Minutes).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">returns timerange:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">A pandas DatetimeIndex value used to define the range of times with which the data covers.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># caluclate number of data (periods) in file</span>
+<span class="n">periods</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">span</span><span class="o">*</span><span class="mi">60</span><span class="o">*</span><span class="n">freq</span><span class="p">)</span>
+
+<span class="c1"># format frequency as a string denoting resolution in microseconds</span>
+<span class="n">freq</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">U&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mi">1000000</span><span class="o">/</span><span class="n">freq</span><span class="p">))</span>
+
+<span class="c1"># make start time as datetime.datetime from filename</span>
+<span class="n">starttime</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span><span class="n">filename</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;.mat&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)))</span>
+<span class="n">starttime</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="n">starttime</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">starttime</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">starttime</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                              <span class="n">starttime</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">starttime</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="n">starttime</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+
+<span class="c1"># get timerange as vector of datetimes</span>
+<span class="n">timerange</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">starttime</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="n">periods</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">)</span>
+
+<span class="k">return</span> <span class="n">timerange</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="refine-for-specific-height-and-iec-standards">
+<h1>Refine for Specific Height and IEC Standards<a class="headerlink" href="#refine-for-specific-height-and-iec-standards" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">make_dataframe_for_height</span><span class="p">(</span><span class="n">inputdata</span><span class="p">,</span> <span class="n">timerange</span><span class="p">,</span> <span class="n">probeheight</span><span class="o">=</span><span class="mi">74</span><span class="p">,</span> <span class="n">include_UTC</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+</pre></div>
+</div>
+<p><strong>Generate a DataFrame based on the probe height.</strong></p>
+<p>This function takes inputs from desired input data and returns a pandas DataFrame containing all of the desired data at the given probe height including wind speed, wind direction, and the date and timestamps of the input data.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">param inputdata:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">A dictionary containing all of the desired input data.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">param timerange:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">A pandas DatetimeIndex value used to define the range of times with which the data covers.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">param probeheight:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">An integer or float value used to define the desired height of the probe from which to begin data analysis (m).</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">param include_UTC:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">A Boolean value used to determine whether or not an UTC timestamp is desired of the form ‘time_UTC’.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">returns sonicdat:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">A pandas DataFrame containing all of the desired data at the given probe height including wind speed, wind direction, and the date and timestamps of the input data.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># select all variables at a given height</span>
+<span class="n">varnames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">inputdata</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="n">varnames</span> <span class="o">=</span> <span class="p">[</span><span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">varnames</span> <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">probeheight</span><span class="p">)</span> <span class="ow">in</span> <span class="n">var</span><span class="p">]</span>
+<span class="c1"># get windspeed variable</span>
+<span class="n">temp</span> <span class="o">=</span> <span class="p">[</span><span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">varnames</span> <span class="k">if</span> <span class="s1">&#39;WS&#39;</span> <span class="ow">in</span> <span class="n">var</span><span class="p">]</span>
+<span class="n">temp</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">varnames</span> <span class="k">if</span> <span class="s1">&#39;CupEqHorizSpeed&#39;</span> <span class="ow">in</span> <span class="n">var</span><span class="p">])</span>
+<span class="c1"># get winddirection variable</span>
+<span class="n">temp</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">varnames</span> <span class="k">if</span> <span class="s1">&#39;WD&#39;</span> <span class="ow">in</span> <span class="n">var</span><span class="p">])</span>
+<span class="n">temp</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">varnames</span> <span class="k">if</span> <span class="s1">&#39;direction&#39;</span> <span class="ow">in</span> <span class="n">var</span><span class="p">])</span>
+<span class="c1"># include the UTC time</span>
+<span class="k">if</span> <span class="n">include_UTC</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;time_UTC&#39;</span><span class="p">)</span>
+
+<span class="c1"># get variables of interest into a new dict</span>
+<span class="n">sonicdat</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="p">:</span> <span class="n">inputdata</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">temp</span><span class="p">}</span>
+<span class="c1"># make a Pandas DataFrame</span>
+<span class="n">sonicdat</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">sonicdat</span><span class="p">)</span>
+<span class="c1"># setup datetime index</span>
+<span class="n">sonicdat</span><span class="p">[</span><span class="s1">&#39;datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">timerange</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">sonicdat</span><span class="o">.</span><span class="n">index</span><span class="p">)]</span>
+<span class="n">sonicdat</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;datetime&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">sonicdat</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">()</span>
+
+<span class="n">sonicdat</span> <span class="o">=</span> <span class="n">sonicdat</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="s1">&#39;WS&#39;</span><span class="p">,</span> <span class="n">temp</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="s1">&#39;WD&#39;</span><span class="p">})</span>
+
+<span class="k">return</span> <span class="n">sonicdat</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">setup_IEC_params</span><span class="p">(</span><span class="n">sonicdat</span><span class="p">,</span> <span class="n">probeheight</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+</pre></div>
+</div>
+<p><strong>Establish IEC parameters.</strong></p>
+<p>This function takes inputs from a pandas DataFrame containing all of the desired data at the given probe height and establishes all of the International Electrotechnical Commission (IEC) parameters for the given input data and probe height.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param sonicdat:</th><td class="field-body">A pandas DataFrame containing all of the desired data at the given probe height including wind speed, wind direction, and the date and timestamps of the input data.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">param probeheight:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">An integer or float value used to define the desired height of the probe from which to begin data analysis (m).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">returns params:</th><td class="field-body">A dictionary containing all of the parameters established by the IEC for the given input data and probe height.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">### quantities of interest for IEC</span>
+<span class="c1"># turbulence estimate over period, standard deviation of cupspeed</span>
+<span class="c1"># filter wind directions that cross the 360/0 threshold</span>
+<span class="k">if</span> <span class="n">sonicdat</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">180</span><span class="p">:</span>
+    <span class="n">sonicdat</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sonicdat</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">,</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">360</span>
+<span class="k">else</span><span class="p">:</span>
+   <span class="n">sonicdat</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sonicdat</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">350</span><span class="p">,</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="mi">360</span>
+
+<span class="c1">######## parameters</span>
+<span class="c1">### IEC parameters</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;turbclass&#39;</span><span class="p">:</span> <span class="s1">&#39;IA&#39;</span><span class="p">}</span>
+<span class="c1"># Based on IEC Class IA</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;Vref&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">50.0</span> <span class="c1">#m/s</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;Iref&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.16</span> <span class="c1"># turbulence intensity</span>
+<span class="c1"># &#39;average&#39; velocity</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;Vave&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.2</span><span class="o">*</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;Vref&#39;</span><span class="p">]</span>
+<span class="c1"># shear exponent</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="c1"># longitudinal turbulence scale parameter</span>
+<span class="k">if</span> <span class="n">probeheight</span> <span class="o">&lt;</span> <span class="mi">60</span><span class="p">:</span>
+    <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Lambda_1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.7</span><span class="o">*</span><span class="n">probeheight</span> <span class="c1"># m</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Lambda_1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">42</span> <span class="c1"># m</span>
+<span class="c1"># shear exponent</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;beta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">6.4</span>
+
+<span class="c1">### data parameters</span>
+<span class="c1"># NREL GE1.5MW rotor diameter</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">80</span>
+<span class="c1"># sampling frequency</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;freq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span> <span class="c1"># Hz</span>
+<span class="c1"># probe height</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;probeheight&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">probeheight</span>
+<span class="c1">### normal wind profile model</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;zhub&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">80</span> <span class="c1"># m</span>
+<span class="c1"># &#39;hub&#39; height velocity (really just mean probe velocity)</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;vhub&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sonicdat</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="c1"># m/s</span>
+<span class="c1"># dummy vertical coordinate</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">120</span><span class="p">,</span><span class="mi">120</span><span class="p">)</span>
+<span class="c1"># standard normal velocity profile</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;vprofile&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;vhub&#39;</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;zhub&#39;</span><span class="p">])</span><span class="o">**</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;sigma_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sonicdat</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+
+<span class="c1">### Normal Wind speed distributions</span>
+<span class="c1"># dummy velocity data</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;vrange&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;Vref&#39;</span><span class="p">],</span><span class="mi">100</span><span class="p">)</span>
+<span class="c1"># velocity probability density function</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;pdf&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;vrange&#39;</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;Vave&#39;</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span> \
+    <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;vrange&#39;</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;Vave&#39;</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+<span class="c1"># velocity cumulative probability density function</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;cdf&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span> <span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;vrange&#39;</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;Vave&#39;</span><span class="p">]))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Extreme wind speed model (EWM)</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;Ve50&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.4</span><span class="o">*</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;Vref&#39;</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;probeheight&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;zhub&#39;</span><span class="p">])</span><span class="o">**</span><span class="p">(</span><span class="mf">0.11</span><span class="p">)</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;Ve01&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.8</span><span class="o">*</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;Ve50&#39;</span><span class="p">]</span>
+
+<span class="k">return</span> <span class="n">params</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="find-extreme-events">
+<h1>Find Extreme Events<a class="headerlink" href="#find-extreme-events" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">find_EWM_events</span><span class="p">(</span><span class="n">sonicdat</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+</pre></div>
+</div>
+<p><strong>Find extreme wind speed events.</strong></p>
+<p>This function takes inputs from a pandas DataFrame containing all of the desired data and International Electrotechnical Commission (IEC) parameters at the given probe height, determines extreme wind speed events, and returns the findings in lists separating one-year and 50-year events. These lists will be concatenated to a larger list which will be used to index files later.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param sonicdat:</th><td class="field-body">A pandas DataFrame containing all of the desired data at the given probe height including wind speed, wind direction, and the date and timestamps of the input data.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param params:</th><td class="field-body">A dictionary containing all of the parameters established by the IEC for the given input data and probe height.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">returns Ve01eventfound:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">A list of all the extreme wind events higher than within the past year.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">returns Ve50eventfound:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">A list of all the extreme wind events higher than within the past 50 years.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Compare extreme wind speeds to data</span>
+<span class="c1"># extract df of events</span>
+<span class="n">Ve50eventfound</span> <span class="o">=</span> <span class="n">sonicdat</span><span class="p">[</span><span class="n">sonicdat</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Ve50&#39;</span><span class="p">]]</span>
+<span class="n">Ve01eventfound</span> <span class="o">=</span> <span class="n">sonicdat</span><span class="p">[</span><span class="n">sonicdat</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Ve01&#39;</span><span class="p">]]</span>
+
+
+<span class="k">return</span> <span class="n">Ve01eventfound</span><span class="p">,</span> <span class="n">Ve50eventfound</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">find_EOG_events</span><span class="p">(</span><span class="n">sonicdat</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mf">10.5</span><span class="p">):</span>
+</pre></div>
+</div>
+<p><strong>Find extreme operating wind gust events.</strong></p>
+<p>This function takes inputs from a pandas DataFrame containing all of the desired data and International Electrotechnical Commission (IEC) parameters at the given period for search, determines extreme operating wind gust events, and returns the findings in an object which can be used to index files later.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param sonicdat:</th><td class="field-body">A pandas DataFrame containing all of the desired data at the given probe height including wind speed, wind direction, and the date and timestamps of the input data.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param params:</th><td class="field-body">A dictionary containing all of the parameters established by the IEC for the given input data and probe height.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">param T:</th><td class="field-body">A float used to define the period for search (Seconds).</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">returns EOGeventfound:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">An object used to store any significant extreme operating wind gust events.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="mi">100</span><span class="p">)</span>
+
+<span class="c1"># Compare maximum gust speed to data</span>
+<span class="c1"># if an extreme events occurs, append time to list</span>
+<span class="n">EOGeventfound</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">itime</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">sonicdat</span><span class="p">),</span><span class="nb">int</span><span class="p">(</span><span class="n">T</span><span class="o">*</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;freq&#39;</span><span class="p">])):</span>
+<span class="c1"># for itime, tempspeed in sonicdat[&#39;WS&#39;].iloc[::int(T*params[&#39;freq&#39;])].items():</span>
+
+    <span class="c1"># extract 6 second slice of direction data</span>
+    <span class="n">vslice</span> <span class="o">=</span> <span class="n">sonicdat</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">itime</span><span class="p">:</span><span class="n">itime</span><span class="o">+</span><span class="nb">int</span><span class="p">(</span><span class="n">T</span><span class="o">*</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;freq&#39;</span><span class="p">])]</span>
+
+    <span class="c1"># standard velocity variance</span>
+    <span class="n">sigma_1</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Iref&#39;</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mf">0.75</span><span class="o">*</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">+</span> <span class="mf">5.6</span><span class="p">)</span>
+
+    <span class="n">Vgust</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="mf">1.35</span><span class="o">*</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;Ve01&#39;</span><span class="p">]</span><span class="o">-</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> \
+                <span class="mf">3.3</span><span class="o">*</span><span class="p">(</span><span class="n">sigma_1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="mf">0.1</span><span class="o">*</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;Lambda_1&#39;</span><span class="p">]))])</span>
+    <span class="n">Vgust</span> <span class="o">=</span> <span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mf">0.37</span><span class="o">*</span><span class="n">Vgust</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">t</span><span class="o">/</span><span class="n">T</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">t</span><span class="o">/</span><span class="n">T</span><span class="p">))</span>
+
+    <span class="c1"># test</span>
+    <span class="n">Vgusttest</span> <span class="o">=</span> <span class="n">vslice</span><span class="p">[</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">Vgust</span><span class="o">.</span><span class="n">max</span><span class="p">()]</span>
+    <span class="c1"># index times of EOG events</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Vgusttest</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>\
+                                <span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()]],</span> \
+                            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">,</span><span class="s1">&#39;WSmax&#39;</span><span class="p">,</span><span class="s1">&#39;WSmin&#39;</span><span class="p">,</span><span class="s1">&#39;WD&#39;</span><span class="p">,</span><span class="s1">&#39;WDmax&#39;</span><span class="p">,</span><span class="s1">&#39;WDmin&#39;</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">vslice</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">EOGeventfound</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">EOGeventfound</span><span class="p">,</span> <span class="n">temp</span><span class="p">])</span>
+
+<span class="k">return</span> <span class="n">EOGeventfound</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">find_ETM_events</span><span class="p">(</span><span class="n">sonicdat</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+</pre></div>
+</div>
+<p><strong>Find extreme turbulence model events.</strong></p>
+<p>This function takes inputs from a pandas DataFrame containing all of the desired data and International Electrotechnical Commission (IEC) parameters at the given period for search, determines extreme turbulence model events, and returns the findings in an object which can be used to index files later.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param sonicdat:</th><td class="field-body">A pandas DataFrame containing all of the desired data at the given probe height including wind speed, wind direction, and the date and timestamps of the input data.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param params:</th><td class="field-body">A dictionary containing all of the parameters established by the IEC for the given input data and probe height.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">returns ETMeventfound:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">An object used to store any significant extreme turbulence model events.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Extreme turbulence model</span>
+<span class="n">c</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># m/s</span>
+<span class="n">sigmatest</span> <span class="o">=</span> <span class="n">c</span><span class="o">*</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;Iref&#39;</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mf">0.072</span><span class="o">*</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;Vave&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">c</span><span class="o">+</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;vhub&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">c</span><span class="o">+</span><span class="mi">4</span><span class="p">)</span><span class="o">+</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># Compare maximum turbulence to data</span>
+<span class="c1"># if an extreme event occurs, append filename to list</span>
+<span class="n">sigmatest</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;sigma_data&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">sigmatest</span>
+<span class="n">ETMeventfound</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">sigmatest</span><span class="p">:</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="n">sonicdat</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">sonicdat</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span><span class="n">sonicdat</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>\
+                                <span class="n">sonicdat</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">sonicdat</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span><span class="n">sonicdat</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()]],</span> \
+                            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">,</span><span class="s1">&#39;WSmax&#39;</span><span class="p">,</span><span class="s1">&#39;WSmin&#39;</span><span class="p">,</span><span class="s1">&#39;WD&#39;</span><span class="p">,</span><span class="s1">&#39;WDmax&#39;</span><span class="p">,</span><span class="s1">&#39;WDmin&#39;</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">sonicdat</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">ETMeventfound</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">ETMeventfound</span><span class="p">,</span> <span class="n">temp</span><span class="p">])</span>
+
+<span class="k">return</span> <span class="n">ETMeventfound</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">find_EDC_events</span><span class="p">(</span><span class="n">sonicdat</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">T</span> <span class="o">=</span> <span class="mi">6</span><span class="p">):</span>
+</pre></div>
+</div>
+<p><strong>Find extreme wind direction change events.</strong></p>
+<p>This function takes inputs from a pandas DataFrame containing all of the desired data and International Electrotechnical Commission (IEC) parameters at the given period for search, determines extreme wind direction change events, and returns the findings in an object which can be used to index files later.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param sonicdat:</th><td class="field-body"><p class="first">A pandas DataFrame containing all of the desired data at the given probe height including wind speed, wind direction, and the date and timestamps of the input data.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param params:</th><td class="field-body"><p class="first">A dictionary containing all of the parameters established by the IEC for the given input data and probe height.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param T:</th><td class="field-body">A float used to define the period for search (Seconds).</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">returns EDCeventfound:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">An object used to store any significant extreme wind direction change events.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># seconds * sampling freq</span>
+<span class="n">stride</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">T</span><span class="o">*</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;freq&#39;</span><span class="p">])</span>
+
+<span class="c1"># index times of EDC events</span>
+<span class="n">EDCeventfound</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">itime</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">sonicdat</span><span class="p">),</span><span class="n">stride</span><span class="p">):</span>
+<span class="c1"># for itime, tempspeed in sonicdat[&#39;WS&#39;].iloc[::int(T*params[&#39;freq&#39;])].items():</span>
+
+    <span class="c1"># extract 6 second slice of direction data</span>
+    <span class="n">vslice</span> <span class="o">=</span> <span class="n">sonicdat</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">itime</span><span class="p">:</span><span class="n">itime</span><span class="o">+</span><span class="n">stride</span><span class="p">]</span>
+
+    <span class="n">sigma_1</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Iref&#39;</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mf">0.75</span><span class="o">*</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">+</span> <span class="mf">5.6</span><span class="p">)</span>
+
+    <span class="c1"># Maximum allowable change in wind direction over a 6 second period</span>
+    <span class="n">theta_e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">sigma_1</span><span class="o">/</span><span class="p">(</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="mf">0.1</span><span class="o">*</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;Lambda_1&#39;</span><span class="p">]))))</span>
+
+    <span class="c1"># test</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">stride</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">theta_e</span><span class="p">:</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>\
+                                <span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()]],</span> \
+                            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">,</span><span class="s1">&#39;WSmax&#39;</span><span class="p">,</span><span class="s1">&#39;WSmin&#39;</span><span class="p">,</span><span class="s1">&#39;WD&#39;</span><span class="p">,</span><span class="s1">&#39;WDmax&#39;</span><span class="p">,</span><span class="s1">&#39;WDmin&#39;</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">vslice</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">EDCeventfound</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">EDCeventfound</span><span class="p">,</span> <span class="n">temp</span><span class="p">])</span>
+
+<span class="k">return</span> <span class="n">EDCeventfound</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">find_ECD_events</span><span class="p">(</span><span class="n">sonicdat</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">T</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
+</pre></div>
+</div>
+<p><strong>Find extreme coherent wind gust with wind direction change events.</strong></p>
+<p>This function takes inputs from a pandas DataFrame containing all of the desired data and International Electrotechnical Commission (IEC) parameters at the given period for search, determines extreme coherent wind gust with wind direction change events, and returns the findings in an object which can be used to index files later.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param sonicdat:</th><td class="field-body">A pandas DataFrame containing all of the desired data at the given probe height including wind speed, wind direction, and the date and timestamps of the input data.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param params:</th><td class="field-body">A dictionary containing all of the parameters established by the IEC for the given input data and probe height.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">param T:</th><td class="field-body">A float used to define the period for search (Seconds).</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">returns ECDeventfound:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">An object used to store any significant extreme coherent wind gust with wind direction change events.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Extreme coherent gust with direction change (ECD)</span>
+
+<span class="c1"># extreme coherent gust velocity magnitude (delta)</span>
+<span class="n">Vcg</span> <span class="o">=</span> <span class="mi">15</span> <span class="c1"># m/s See IEC standards</span>
+<span class="c1"># T seconds at 20 Hz</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="n">T</span><span class="o">*</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;freq&#39;</span><span class="p">]))</span>
+<span class="n">stride</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">T</span><span class="o">*</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;freq&#39;</span><span class="p">])</span>
+
+<span class="c1"># function forms of coherent gust velocity and direction</span>
+<span class="c1"># vzt = cupspeed[starttime] + 0.5*Vcg*(1-np.cos(np.pi*t/T))</span>
+<span class="c1"># thetat = winddir[starttime] + 0.5*Vcg*(1-np.cos(np.pi*t/T))</span>
+
+<span class="c1"># scan for ECD</span>
+<span class="c1"># index times of EDC events</span>
+<span class="n">ECDeventfound</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">itime</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">sonicdat</span><span class="p">),</span><span class="n">stride</span><span class="p">):</span>
+<span class="c1"># for itime, tempspeed in sonicdat[&#39;WS&#39;].iloc[::int(T*params[&#39;freq&#39;])].items():</span>
+
+    <span class="c1"># extract 6 second slice of direction data</span>
+    <span class="n">vslice</span> <span class="o">=</span> <span class="n">sonicdat</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">itime</span><span class="p">:</span><span class="n">itime</span><span class="o">+</span><span class="n">stride</span><span class="p">]</span>
+
+    <span class="c1"># start and end velocities</span>
+    <span class="n">vstart</span> <span class="o">=</span> <span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">vend</span> <span class="o">=</span> <span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">stride</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># extreme  cohcerent gust velocity change</span>
+    <span class="n">V_ECD</span> <span class="o">=</span> <span class="n">vstart</span> <span class="o">+</span> <span class="n">Vcg</span>
+
+    <span class="c1"># test for wind speed condition</span>
+    <span class="k">if</span> <span class="n">vend</span> <span class="o">&gt;=</span> <span class="n">V_ECD</span><span class="p">:</span>
+        <span class="c1"># start and end directions</span>
+        <span class="n">dstart</span> <span class="o">=</span> <span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">dend</span> <span class="o">=</span> <span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">stride</span><span class="p">]</span>
+
+        <span class="c1"># extreme  cohcerent gust direction change</span>
+        <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;vhub&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">theta_cg</span> <span class="o">=</span> <span class="mi">180</span> <span class="c1"># degrees</span>
+        <span class="k">elif</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;vhub&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Vref&#39;</span><span class="p">]:</span>
+            <span class="n">theta_cg</span> <span class="o">=</span> <span class="mi">720</span><span class="o">/</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;vhub&#39;</span><span class="p">]</span> <span class="c1"># degrees</span>
+
+        <span class="c1"># test for wind direction condition</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dend</span><span class="o">-</span><span class="n">dstart</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">theta_cg</span><span class="p">:</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>\
+                                <span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()]],</span> \
+                            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">,</span><span class="s1">&#39;WSmax&#39;</span><span class="p">,</span><span class="s1">&#39;WSmin&#39;</span><span class="p">,</span><span class="s1">&#39;WD&#39;</span><span class="p">,</span><span class="s1">&#39;WDmax&#39;</span><span class="p">,</span><span class="s1">&#39;WDmin&#39;</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">vslice</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ECDeventfound</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">ECDeventfound</span><span class="p">,</span> <span class="n">temp</span><span class="p">])</span>
+
+<span class="k">return</span> <span class="n">ECDeventfound</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">find_EWS_events</span><span class="p">(</span><span class="n">sonicdat</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">T</span> <span class="o">=</span> <span class="mi">12</span><span class="p">):</span>
+</pre></div>
+</div>
+<p><strong>Find extreme coherent wind shear events.</strong></p>
+<p>This function takes inputs from a pandas DataFrame containing all of the desired data and International Electrotechnical Commission (IEC) parameters at the given period for search, determines extreme coherent wind shear events, and returns the findings in an object which can be used to index files later.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param sonicdat:</th><td class="field-body">A pandas DataFrame containing all of the desired data at the given probe height including wind speed, wind direction, and the date and timestamps of the input data.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param params:</th><td class="field-body">A dictionary containing all of the parameters established by the IEC for the given input data and probe height.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">param T:</th><td class="field-body">A float used to define the period for search (Seconds).</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">returns EWSeventfound:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">An object used to store any significant extreme wind shear events.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Extreme wind shear (EWS)</span>
+
+<span class="c1"># extreme coherent gust velocity magnitude</span>
+<span class="n">Vcg</span> <span class="o">=</span> <span class="mi">15</span> <span class="c1"># m/s</span>
+<span class="c1"># T seconds at 20 Hz</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="n">T</span><span class="o">*</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;freq&#39;</span><span class="p">]))</span>
+<span class="n">stride</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">T</span><span class="o">*</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;freq&#39;</span><span class="p">])</span>
+
+<span class="c1"># # transient horizontal shear (not applicable in our data...)</span>
+<span class="c1"># v_horz_pos = vhub*(probeheight/zhub)**alpha + ((probeheight-zhub)/D)*(2.5 + 0.2*beta*sigma_1*(D/Lambda_1)**0.25)*(1-np.cos(np.pi*T/T))</span>
+
+<span class="c1"># scan for EWS</span>
+<span class="n">EWSeventfound</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">itime</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">sonicdat</span><span class="p">),</span><span class="n">stride</span><span class="p">):</span>
+
+    <span class="c1"># extract 6 second slice of direction data</span>
+    <span class="n">vslice</span> <span class="o">=</span> <span class="n">sonicdat</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">itime</span><span class="p">:</span><span class="n">itime</span><span class="o">+</span><span class="n">stride</span><span class="p">]</span>
+
+    <span class="n">sigma_1</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Iref&#39;</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mf">0.75</span><span class="o">*</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">+</span> <span class="mf">5.6</span><span class="p">)</span>
+
+    <span class="n">extreme</span> <span class="o">=</span> <span class="p">((</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;probeheight&#39;</span><span class="p">]</span><span class="o">-</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;zhub&#39;</span><span class="p">])</span><span class="o">/</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">])</span><span class="o">*</span>\
+        <span class="p">(</span><span class="mf">2.5</span> <span class="o">+</span> <span class="mf">0.2</span><span class="o">*</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;beta&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">sigma_1</span><span class="o">*</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;Lambda_1&#39;</span><span class="p">])</span><span class="o">**</span><span class="mf">0.25</span><span class="p">)</span>\
+        <span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">T</span><span class="o">/</span><span class="n">T</span><span class="p">))</span>
+
+    <span class="c1"># transient vertical shear</span>
+    <span class="n">v_vert_pos</span> <span class="o">=</span> <span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;probeheight&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;zhub&#39;</span><span class="p">])</span><span class="o">**</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">extreme</span>
+    <span class="n">v_vert_neg</span> <span class="o">=</span> <span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;probeheight&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;zhub&#39;</span><span class="p">])</span><span class="o">**</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">extreme</span>
+
+    <span class="c1"># test</span>
+    <span class="n">vtest</span> <span class="o">=</span> <span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">][(</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">v_vert_pos</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">v_vert_neg</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vtest</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>\
+                                <span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span><span class="n">vslice</span><span class="p">[</span><span class="s1">&#39;WD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()]],</span> \
+                            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">,</span><span class="s1">&#39;WSmax&#39;</span><span class="p">,</span><span class="s1">&#39;WSmin&#39;</span><span class="p">,</span><span class="s1">&#39;WD&#39;</span><span class="p">,</span><span class="s1">&#39;WDmax&#39;</span><span class="p">,</span><span class="s1">&#39;WDmin&#39;</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">vslice</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">EWSeventfound</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">EWSeventfound</span><span class="p">,</span> <span class="n">temp</span><span class="p">])</span>
+
+
+<span class="k">return</span> <span class="n">EWSeventfound</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="end-of-code">
+<h1>End of Code<a class="headerlink" href="#end-of-code" title="Permalink to this headline">¶</a></h1>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">MetMast</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Import MET Data (lambda/no lambda)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#filter-the-data">Filter the Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#begin-categorization">Begin Categorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#groom-data-based-on-parameters">Groom Data Based on Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#organize-the-data">Organize the Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#auxiliary-functions-to-filter-data">Auxiliary Functions to Filter Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#code-for-future-plotting">Code for Future Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#refine-for-specific-height-and-iec-standards">Refine for Specific Height and IEC Standards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#find-extreme-events">Find Extreme Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#end-of-code">End of Code</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to MetMast!</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Nicholas Hamilton, Lucas McCullum.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/met_funcs.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
